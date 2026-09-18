@@ -931,6 +931,10 @@ Te veo pronto en mi Skool.
             object-fit: cover;
             display: block;
         }
+        /* ––– LIGHTBOX: cursor pointer solo en imágenes ampliables ––– */
+        .map-item .mockup-placeholder img[data-lightbox="true"] {
+            cursor: pointer;
+        }
         .map-item .mockup-dash {
             background: linear-gradient(145deg, #f5f5f5, #eaeaea);
         }
@@ -973,6 +977,79 @@ Te veo pronto en mi Skool.
             background: var(--lime-dim);
             color: #1a1a1a;
             transform: translateY(-2px);
+        }
+
+        /* ––– LIGHTBOX (NUEVO) ––– */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .lightbox.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .lightbox-img {
+            max-width: 1080px;
+            max-height: 720px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            border-radius: 4px;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
+        }
+        /* ––– AJUSTE QUIRÚRGICO: botón × sin círculo, sin fondo, sin borde ––– */
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.6rem;
+            font-family: 'Inter', sans-serif;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s;
+            z-index: 1;
+            padding: 0;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .lightbox-close:hover {
+            background: transparent;
+            border: none;
+            color: #fff;
+        }
+        @media (max-width: 768px) {
+            .lightbox {
+                padding: 60px 20px 20px 20px;
+            }
+            .lightbox-img {
+                max-width: 100%;
+                max-height: 100%;
+            }
+            .lightbox-close {
+                top: 12px;
+                right: 12px;
+                width: 40px;
+                height: 40px;
+                font-size: 1.4rem;
+            }
         }
 
         /* ––– PROCESO ––– */
@@ -2337,6 +2414,12 @@ Te veo pronto en mi Skool.
 
     <footer class="footer"><p>© 2026 Fer Puc. Todos los derechos reservados.</p></footer>
 
+    <!-- ––– LIGHTBOX (NUEVO) ––– -->
+    <div class="lightbox" id="lightbox" aria-hidden="true">
+        <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Cerrar">×</button>
+        <img class="lightbox-img" id="lightboxImg" src="" alt="">
+    </div>
+
     <script>
         (function() {
             const WHATSAPP_NUMBER = '529997488952';
@@ -2497,8 +2580,11 @@ Te veo pronto en mi Skool.
                 return steps;
             }
 
-            function buildMockupHTML(cls, src) {
-                return `<div class="${cls}"><img src="${src}" alt="" loading="lazy"></div>`;
+            /* ––– AJUSTE: buildMockupHTML ahora acepta un tercer parámetro opcional `lightbox` –––
+               Cuando es true, la imagen se marca con data-lightbox="true" para ser ampliable. */
+            function buildMockupHTML(cls, src, lightbox) {
+                const attr = lightbox ? ' data-lightbox="true"' : '';
+                return `<div class="${cls}"><img src="${src}" alt="" loading="lazy"${attr}></div>`;
             }
 
             let currentCurrency = 'USD';
@@ -2677,31 +2763,28 @@ Te veo pronto en mi Skool.
                         stepsHTML += '</div>';
                         mockupWrap.innerHTML = stepsHTML;
                     } else if (cat.id === 'contenido') {
-                        // CORRECCIÓN: cada plan usa sus propias 2 imágenes (offset = idx * 2)
                         mockupWrap.classList.add('mockups-two');
                         const offset = idx * 2;
                         for (let m = 0; m < 2; m++) {
                             const cls = 'mockup-placeholder mockup-wide mockup-laptop';
                             const src = `images/contenido-${offset + m + 1}.jpg`;
-                            mockupWrap.innerHTML += buildMockupHTML(cls, src);
+                            mockupWrap.innerHTML += buildMockupHTML(cls, src, true);
                         }
                     } else if (cat.id === 'branding') {
-                        // CORRECCIÓN: cada plan usa sus propias 4 imágenes (offset = idx * 4)
                         const offset = idx * 4;
                         for (let m = 0; m < 4; m++) {
                             let cls = 'mockup-placeholder';
                             if (plan.mockupType === 'brand') cls += ' mockup-brand';
                             const src = `images/branding-${offset + m + 1}.jpg`;
-                            mockupWrap.innerHTML += buildMockupHTML(cls, src);
+                            mockupWrap.innerHTML += buildMockupHTML(cls, src, true);
                         }
                     } else if (cat.id === 'landing-pages') {
-                        // CORRECCIÓN: cada plan usa sus propias 4 imágenes (offset = idx * 4)
                         const offset = idx * 4;
                         for (let m = 0; m < 4; m++) {
                             let cls = 'mockup-placeholder';
                             if (plan.mockupType === 'laptop') cls += ' mockup-laptop';
                             const src = `images/landing-${offset + m + 1}.jpg`;
-                            mockupWrap.innerHTML += buildMockupHTML(cls, src);
+                            mockupWrap.innerHTML += buildMockupHTML(cls, src, true);
                         }
                     } else {
                         const mockupCount = Math.min(4, Math.max(2, plan.benefits ? plan.benefits.length + 1 : 2));
@@ -2711,7 +2794,7 @@ Te veo pronto en mi Skool.
                             else if (plan.mockupType === 'brand') cls += ' mockup-brand';
                             else if (plan.mockupType === 'laptop') cls += ' mockup-laptop';
                             const src = `images/software-${m + 1}.jpg`;
-                            mockupWrap.innerHTML += buildMockupHTML(cls, src);
+                            mockupWrap.innerHTML += buildMockupHTML(cls, src, true);
                         }
                     }
                     content.appendChild(mockupWrap);
@@ -2725,6 +2808,56 @@ Te veo pronto en mi Skool.
 
                 catDiv.appendChild(plansContainer);
                 mapGrid.appendChild(catDiv);
+            });
+
+            /* ––– LIGHTBOX: lógica (NUEVO) ––– */
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightboxImg');
+            const lightboxClose = document.getElementById('lightboxClose');
+
+            function openLightbox(src) {
+                lightboxImg.src = src;
+                lightbox.classList.add('open');
+                lightbox.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeLightbox() {
+                lightbox.classList.remove('open');
+                lightbox.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+                setTimeout(function() { lightboxImg.src = ''; }, 300);
+            }
+
+            /* Delegación de eventos: solo abre el lightbox para imágenes marcadas
+               con data-lightbox="true" (servicios 02 al 05). */
+            document.addEventListener('click', function(e) {
+                const img = e.target.closest('img[data-lightbox="true"]');
+                if (img) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openLightbox(img.src);
+                }
+            });
+
+            /* Cerrar con el botón × */
+            lightboxClose.addEventListener('click', function(e) {
+                e.stopPropagation();
+                closeLightbox();
+            });
+
+            /* Cerrar haciendo clic fuera de la imagen (en el overlay negro) */
+            lightbox.addEventListener('click', function(e) {
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+
+            /* Cerrar con tecla Escape */
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && lightbox.classList.contains('open')) {
+                    closeLightbox();
+                }
             });
 
             const allPlans = document.querySelectorAll('.plan-item');
