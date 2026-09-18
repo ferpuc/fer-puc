@@ -2677,30 +2677,24 @@ Te veo pronto en mi Skool.
                         stepsHTML += '</div>';
                         mockupWrap.innerHTML = stepsHTML;
                     } else if (cat.id === 'contenido') {
-                        // CORRECCIÓN: cada plan usa sus propias 2 imágenes (offset = idx * 2)
                         mockupWrap.classList.add('mockups-two');
-                        const offset = idx * 2;
                         for (let m = 0; m < 2; m++) {
                             const cls = 'mockup-placeholder mockup-wide mockup-laptop';
-                            const src = `images/contenido-${offset + m + 1}.jpg`;
+                            const src = `images/contenido-${m + 1}.jpg`;
                             mockupWrap.innerHTML += buildMockupHTML(cls, src);
                         }
                     } else if (cat.id === 'branding') {
-                        // CORRECCIÓN: cada plan usa sus propias 4 imágenes (offset = idx * 4)
-                        const offset = idx * 4;
                         for (let m = 0; m < 4; m++) {
                             let cls = 'mockup-placeholder';
                             if (plan.mockupType === 'brand') cls += ' mockup-brand';
-                            const src = `images/branding-${offset + m + 1}.jpg`;
+                            const src = `images/branding-${m + 1}.jpg`;
                             mockupWrap.innerHTML += buildMockupHTML(cls, src);
                         }
                     } else if (cat.id === 'landing-pages') {
-                        // CORRECCIÓN: cada plan usa sus propias 4 imágenes (offset = idx * 4)
-                        const offset = idx * 4;
                         for (let m = 0; m < 4; m++) {
                             let cls = 'mockup-placeholder';
                             if (plan.mockupType === 'laptop') cls += ' mockup-laptop';
-                            const src = `images/landing-${offset + m + 1}.jpg`;
+                            const src = `images/landing-${m + 1}.jpg`;
                             mockupWrap.innerHTML += buildMockupHTML(cls, src);
                         }
                     } else {
